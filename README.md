@@ -55,6 +55,8 @@ generate ideas for a solo-buildable SaaS in the legal space
 | `--constraints` | free text | solo, 90 days, software | Budget, team, timeframe, audience. |
 | `--max-searches` | integer | 3 | Per-agent search cap. |
 | `--refine` | (no value) | off | Run the office-hours pass on the top idea. |
+| `--dry-run` | (no value) | off | Print the run plan and cost estimate without executing. |
+| `--top` | integer | 3 | How many survivors to include in the shortlist. |
 
 Example:
 
@@ -66,9 +68,9 @@ forge ideas --region=ID --lang=id --refine --constraints="solo, under $5k, 60 da
 
 This skill spawns many sub-agents and runs many web searches, so it is heavier than a single-prompt skill. Pick the mode to match the stakes.
 
-- **lite**: 3 ideators, no synthesizer, no peer review, capped searches. Fastest and cheapest. Good for a quick scan.
-- **standard**: full swarm, synthesizer, source verification, council, peer review. The default.
-- **deep**: standard plus one extra ideation round aimed at the council's gaps, then a combined re-rank, with every source verified. Most thorough and most expensive. Use it when the decision matters.
+- **lite**: 3 ideators, no synthesizer, no peer review, capped searches. Approximately 3 agents and 6 searches. Fastest and cheapest. Good for a quick scan.
+- **standard**: full swarm, synthesizer, source verification, council, peer review. Approximately 17 agents and 15 searches. The default.
+- **deep**: standard plus one extra ideation round aimed at the council's gaps, then a combined re-rank, with every source verified. Approximately 28 agents and 30 searches. Most thorough and most expensive. Use it when the decision matters.
 
 If your environment restricts sub-agent tools, the skill falls back to having the orchestrator run the searches and inject results into the persona agents, so it still produces grounded ideas.
 
@@ -97,7 +99,7 @@ idea-forge/
 ## Extending it
 
 - **Add a region**: edit `references/sources.md`.
-- **Change the scoring weights**: edit the chairman weights in `SKILL.md`.
+- **Change the scoring weights**: edit the chairman weights in `SKILL.md`. Defaults: demand 0.30, problem-realness 0.25, buildability 0.20, survivability 0.15, clarity 0.10. SPECULATIVE penalty: -1.5 from the composite.
 - **Restyle the report**: edit the CSS in `examples/sample-report.html`. Every run reuses that style, so changing it once changes all future reports.
 - **Add or swap personas**: edit the persona lists in `SKILL.md`.
 

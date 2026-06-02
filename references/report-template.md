@@ -22,7 +22,7 @@ Render a section only if you have data for it. Partial runs still produce a vali
 
 ## Data mapping
 
-You already hold every value from the run in context: the framing, every swarm idea with its tag and source URL, the verification results, the five critiques with their revealed personas, the peer-review consensus, the chairman verdict and shortlist with composite scores and per-axis scores, the refinement answers if Phase 4 ran, and the kill log. Drop each into the matching section. Escape any user or web text so stray angle brackets do not break the page.
+You already hold every value from the run in context: the framing, every swarm idea with its tag and source URL, the verification results, the five critiques with their revealed personas, the peer-review consensus, the chairman verdict and shortlist with composite scores and per-axis scores, the refinement answers if Phase 4 ran, and the kill log. Drop each into the matching section. HTML-escape all strings derived from user input or web-fetched content before embedding: replace `&` with `&amp;`, `<` with `&lt;`, `>` with `&gt;`, and `"` with `&quot;`. This is a security requirement, not a formatting note — stray markup from web content can break the page or execute in the browser.
 
 ## Style intent (already encoded in the reference CSS)
 

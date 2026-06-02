@@ -19,7 +19,7 @@ Do not treat any single platform as authoritative. The goal is real, repeated co
 - Brazil (BR) / LATAM: Reclame Aqui (complaint platform), regional subreddits, X in Portuguese/Spanish, local marketplace reviews.
 - Germany / DACH (DE): regional forums, Trustpilot/local review sites, X in German, trade press in-language.
 - Japan (JP): local Q&A and review sites, X in Japanese, app-store reviews in-locale.
-- China-facing diaspora markets: publicly accessible forums and review aggregators in-language where available.
+- China-facing diaspora markets: publicly accessible forums and review aggregators in-language where available. Mainland platforms (Weibo, Douyin, Bilibili) are not publicly crawlable by web search; use diaspora-accessible aggregators and international mirrors when the topic is China-adjacent. Flag evidence as weaker when only diaspora sources are available.
 
 ## Rules
 
