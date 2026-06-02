@@ -1,0 +1,15 @@
+# Real run artifacts are user-generated, not part of the skill.
+# The curated example under examples/ is intentionally committed.
+/idea-forge-transcript-*.md
+/idea-forge-report-*.html
+/idea-forge-design-*.md
+/idea-forge-killlog.md
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+__pycache__/
+*.pyc

@@ -1,16 +1,33 @@
 # Idea Forge
 
-A Claude Code skill that turns a topic into a ranked, validated shortlist of ideas. Works in any language and region.
+Turn a topic into a ranked, validated shortlist of ideas, with the sources checked and the weak ideas killed. A Claude Code skill that works in any language and region.
 
-Two phases plus an optional refinement pass:
+You give it a direction. It runs a swarm of researcher agents that find real problems on the web and in regional communities, proposes ideas, verifies every cited source, then puts the pool through an adversarial council that scores and ranks the survivors. Optionally it pressure-tests the top idea in a YC-style office-hours pass. You get a ranked shortlist, a visual HTML report, and a transcript.
 
-1. Ideation swarm: persona agents and a synthesizer search the web and region-appropriate communities for real problems and propose grounded ideas in parallel. Every cited source is then verified.
-2. Validation council: 5 critic agents review the pool, peer-review each other anonymously, and a chairman ranks the survivors on five axes.
-3. Office-hours refinement (optional): the top idea is pressure-tested with a reframe, falsifiable premises, six forcing questions, and build alternatives, then written to a design doc.
+## Why it exists
 
-Output: a ranked shortlist in chat, a visual HTML report, and a full markdown transcript. A running kill-log stops future runs from resurfacing dead ideas.
+A single model asked for ideas is agreeable and ungrounded. It will invent demand that does not exist and praise whatever you propose. Idea Forge fixes both halves: the swarm forces ideas to point at observed, cited problems, and the council is built to tell you which ideas are weak. Sources are fetched and verified, so a fabricated citation gets caught and the idea is downgraded.
 
-Grounding is MIXED: real evidence is preferred and rewarded, speculative ideas are allowed but labeled and penalized. Sources are verified by fetching each URL, so fabricated citations get caught and downgraded.
+## What you get
+
+- A ranked shortlist in chat: title, composite score, one-line rationale, first step.
+- A self-contained HTML report (see `examples/sample-report.html` for a real one).
+- A full markdown transcript of every agent, critique, and verdict.
+- A running kill-log that stops future runs from resurfacing the same dead ends.
+
+See the rendered example without installing anything: open `examples/sample-report.html` in a browser.
+
+## How it works
+
+1. **Framing.** Detect language and region, load the kill-log, state the constraints.
+2. **Ideation swarm.** Five persona agents plus a synthesizer search the web and region-appropriate communities in parallel and propose ideas, each tagged EVIDENCED or SPECULATIVE.
+3. **Source verification.** Every cited URL is fetched. Dead or unrelated links downgrade the idea to SPECULATIVE.
+4. **Validation council.** Five critics score each idea on its own axis, peer-review each other anonymously, and a chairman ranks the survivors.
+5. **Deep second round (deep mode only).** One extra ideation round aimed at the gaps the council found, then a combined re-rank.
+6. **Office-hours refinement (with `--refine`).** The top idea gets a reframe, falsifiable premises, six forcing questions, and build alternatives, written to a design doc.
+7. **Output.** The report is written as HTML by following a fixed build spec that reuses one reference design, so every run looks consistent.
+
+Grounding is mixed by design: evidence is preferred and rewarded in scoring, speculative ideas are allowed but labeled and penalized 1.5 points.
 
 ## Install
 
@@ -18,7 +35,7 @@ Grounding is MIXED: real evidence is preferred and rewarded, speculative ideas a
 git clone https://github.com/alexcsl/ideaforge.git ~/.claude/skills/idea-forge
 ```
 
-Or copy the folder contents (with `SKILL.md` and `references/`) into `~/.claude/skills/idea-forge/`. Restart Claude Code. Works in Claude Code and Claude Cowork.
+Restart Claude Code. Works in Claude Code and Claude Cowork.
 
 ## Use
 
@@ -30,56 +47,67 @@ generate ideas for a solo-buildable SaaS in the legal space
 
 ### Flags
 
-- `--mode lite|standard|deep` (default standard)
-- `--region <ISO country>` (default: inferred from topic, else global)
-- `--lang <ISO language>` (default: inferred from your topic)
-- `--constraints "<budget, team, timeframe, audience>"`
-- `--max-searches <n>` per agent (default 3)
-- `--refine` run the office-hours pass on the top idea (default off)
+| Flag | Values | Default | Effect |
+|------|--------|---------|--------|
+| `--mode` | lite, standard, deep | standard | Depth and cost. See below. |
+| `--region` | ISO country code | inferred | Which communities and market reasoning to use. |
+| `--lang` | ISO language code | inferred | Search and output language. |
+| `--constraints` | free text | solo, 90 days, software | Budget, team, timeframe, audience. |
+| `--max-searches` | integer | 3 | Per-agent search cap. |
+| `--refine` | (no value) | off | Run the office-hours pass on the top idea. |
 
-Example: `forge ideas --region=ID --lang=id --refine --constraints="solo, under $5k, 60 days": tools for small online sellers`
+Example:
+
+```
+forge ideas --region=ID --lang=id --refine --constraints="solo, under $5k, 60 days": tools for small online sellers
+```
 
 ## Modes and cost
 
-This skill spawns many sub-agents and runs many web searches, so it is heavier than a single-prompt skill.
+This skill spawns many sub-agents and runs many web searches, so it is heavier than a single-prompt skill. Pick the mode to match the stakes.
 
-- lite: 3 ideators, no peer review, capped searches. Fastest and cheapest. Good for a quick scan.
-- standard: full swarm, synthesizer, source verification, council, peer review. The default.
-- deep: standard plus a second ideation round seeded by the council's gaps, and exhaustive verification. Most thorough, most expensive.
+- **lite**: 3 ideators, no synthesizer, no peer review, capped searches. Fastest and cheapest. Good for a quick scan.
+- **standard**: full swarm, synthesizer, source verification, council, peer review. The default.
+- **deep**: standard plus one extra ideation round aimed at the council's gaps, then a combined re-rank, with every source verified. Most thorough and most expensive. Use it when the decision matters.
 
-If your environment restricts sub-agent tools, the skill falls back to having the orchestrator run searches and inject results into the persona agents, so it still works.
+If your environment restricts sub-agent tools, the skill falls back to having the orchestrator run the searches and inject results into the persona agents, so it still produces grounded ideas.
 
 ## Internationalization
 
-Detects the language and region of your topic and adapts sources, search language, and market reasoning. See `references/sources.md` for the per-region source map. Non-English topics search the local language first, then English.
-
-## Refinement
-
-With `--refine`, the top idea runs through a YC-style office-hours pass: a reframe, falsifiable premises, six forcing questions, and 2 to 3 build approaches with effort estimates. Output is a design doc you can hand to your planning or build process. If you have the gstack `/office-hours` command installed, the skill defers to it.
+Idea Forge detects the language and region of your topic and adapts its sources, search language, and market reasoning. Non-English topics search the local language first, then English. The per-region source map lives in `references/sources.md` and is easy to extend.
 
 ## Files
 
 ```
 idea-forge/
-  SKILL.md
+  SKILL.md                 the skill the agent reads
   README.md
   LICENSE
   .gitignore
+  examples/
+    sample-report.html     the reference report design, open it in a browser
   references/
-    report-template.md   visual HTML report spec
-    sources.md           per-region source map
-    anonymization.md     deterministic peer-review shuffle
-    refinement.md        office-hours question set
-    example.md           sample input and output shape
+    report-template.md     build spec for the report, points at the reference
+    sources.md             per-region source map
+    anonymization.md       deterministic peer-review shuffle
+    refinement.md          office-hours question set
+    example.md             sample input and output shape
 ```
+
+## Extending it
+
+- **Add a region**: edit `references/sources.md`.
+- **Change the scoring weights**: edit the chairman weights in `SKILL.md`.
+- **Restyle the report**: edit the CSS in `examples/sample-report.html`. Every run reuses that style, so changing it once changes all future reports.
+- **Add or swap personas**: edit the persona lists in `SKILL.md`.
 
 ## Credit
 
 - Council methodology: Andrej Karpathy's LLM Council.
 - Sub-agent council adaptation: tenfoldmarc/llm-council-skill.
-- Office-hours refinement modeled on the gstack /office-hours skill.
-- Ideation swarm, source verification, internationalization, and pipeline: this project.
+- Office-hours refinement modeled on the gstack `/office-hours` skill.
+- Ideation swarm, source verification, internationalization, deep mode, and pipeline: this project.
 
 ## License
 
-MIT.
+MIT. See `LICENSE`.

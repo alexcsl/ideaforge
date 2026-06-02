@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Idea Forge report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Spline+Sans+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --panel: #1a1815;
+    --ink: #f2ede3;
+    --muted: #9a9183;
+    --line: #2c2823;
+    --accent: #e8643c;
+    --accent-soft: #f0a07f;
+    --ev: #c9a227;
+    --spec: #6b6557;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Inter Tight", system-ui, sans-serif; line-height: 1.55;
+    background-image: radial-gradient(circle at 15% -10%, rgba(232,100,60,0.10), transparent 40%);
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 56px 24px 96px; }
+  header.hero { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 40px; }
+  .eyebrow { font-family: "Spline Sans Mono", monospace; font-size: 12px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--accent-soft); margin: 0 0 14px; }
+  h1 { font-family: "Fraunces", serif; font-weight: 900; font-size: clamp(30px, 6vw, 52px);
+    line-height: 1.02; margin: 0 0 16px; letter-spacing: -0.01em; }
+  .meta-line { font-family: "Spline Sans Mono", monospace; font-size: 13px; color: var(--muted); }
+  .constraints { color: var(--muted); margin: 10px 0 0; font-size: 14px; }
+  .stats { display: flex; gap: 28px; flex-wrap: wrap; margin: 28px 0 0; }
+  .stat { display: flex; flex-direction: column; }
+  .stat .n { font-family: "Fraunces", serif; font-weight: 700; font-size: 30px; }
+  .stat .l { font-family: "Spline Sans Mono", monospace; font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted); }
+  h2 { font-family: "Fraunces", serif; font-weight: 700; font-size: 22px; margin: 0; display: inline; }
+  .section { border: 1px solid var(--line); border-radius: 14px; background: var(--panel);
+    margin: 18px 0; padding: 4px 22px; }
+  .section summary { cursor: pointer; padding: 16px 0; list-style: none; display: flex;
+    align-items: baseline; gap: 14px; }
+  .section summary::-webkit-details-marker { display: none; }
+  .section summary::before { content: "+"; font-family: "Spline Sans Mono", monospace;
+    color: var(--accent); font-size: 18px; }
+  .section[open] summary::before { content: "\00d7"; }
+  .hint { font-family: "Spline Sans Mono", monospace; font-size: 11px; color: var(--muted);
+    letter-spacing: 0.08em; }
+
+  .shortlist { display: flex; flex-direction: column; gap: 16px; margin-bottom: 8px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 22px 24px; opacity: 0; transform: translateY(10px);
+    animation: rise 0.5s ease forwards; }
+  .card.lead { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset,
+    0 18px 40px -28px rgba(232,100,60,0.7); }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .card-top { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: start; }
+  .rank { font-family: "Fraunces", serif; font-weight: 900; font-size: 34px; color: var(--accent);
+    line-height: 1; }
+  .card-head h3 { font-family: "Fraunces", serif; font-weight: 700; font-size: 20px;
+    margin: 0 0 8px; line-height: 1.15; }
+  .score { font-family: "Fraunces", serif; font-weight: 900; font-size: 40px; line-height: 1;
+    color: var(--ink); }
+  .rationale { margin: 14px 0; color: var(--ink); }
+  .badge { font-family: "Spline Sans Mono", monospace; font-size: 10px; letter-spacing: 0.1em;
+    padding: 3px 8px; border-radius: 999px; vertical-align: middle; }
+  .badge.ev { background: rgba(201,162,39,0.16); color: var(--ev); border: 1px solid rgba(201,162,39,0.4); }
+  .badge.spec { color: var(--spec); border: 1px solid var(--spec); }
+  .axes { display: flex; flex-direction: column; gap: 5px; margin: 14px 0; }
+  .axis { display: grid; grid-template-columns: 120px 1fr 28px; align-items: center; gap: 10px;
+    font-family: "Spline Sans Mono", monospace; font-size: 11px; color: var(--muted); }
+  .bar { height: 7px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .fill { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-soft)); }
+  .axis-val { text-align: right; color: var(--ink); }
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;
+    border-top: 1px solid var(--line); padding-top: 14px; }
+  .meta .k { display: block; font-family: "Spline Sans Mono", monospace; font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .meta .v { font-size: 14px; }
+
+  .swarm-grid { padding: 8px 0 18px; display: grid; gap: 18px; }
+  .persona-group h4 { font-family: "Spline Sans Mono", monospace; font-size: 12px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-soft); margin: 0 0 8px; }
+  .idea-list { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 10px; }
+  .idea-list li { padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: 8px;
+    border: 1px solid var(--line); font-size: 14px; }
+  .idea-list a { color: var(--accent-soft); font-family: "Spline Sans Mono", monospace; font-size: 12px; }
+  .muted { color: var(--muted); }
+
+  .critiques { display: grid; gap: 12px; padding: 8px 0; }
+  .critique { padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; }
+  .critique h4 { margin: 0 0 6px; font-family: "Spline Sans Mono", monospace; font-size: 13px; }
+  .verdict { padding: 16px; border-radius: 10px; margin: 12px 0; border: 1px solid var(--line);
+    background: rgba(255,255,255,0.02); }
+  .verdict.chair { border-color: var(--accent); }
+  .verdict h4 { margin: 0 0 8px; font-family: "Spline Sans Mono", monospace; font-size: 12px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-soft); }
+
+  .ref-block { padding: 8px 0 14px; }
+  .ref-block h4 { font-family: "Spline Sans Mono", monospace; font-size: 12px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent-soft); margin: 0 0 8px; }
+  .premises { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .premises li { font-size: 14px; }
+  .verdict-tag { font-family: "Spline Sans Mono", monospace; font-size: 10px; padding: 2px 7px;
+    border-radius: 999px; letter-spacing: 0.08em; }
+  .verdict-tag.accepted { color: var(--ev); border: 1px solid rgba(201,162,39,0.4); }
+  .verdict-tag.rejected { color: var(--accent); border: 1px solid var(--accent); }
+  .verdict-tag.adjusted { color: var(--accent-soft); border: 1px solid var(--accent-soft); }
+  .qa { display: grid; grid-template-columns: 180px 1fr; gap: 12px; padding: 8px 0;
+    border-bottom: 1px solid var(--line); font-size: 14px; }
+  .qa .q { font-family: "Spline Sans Mono", monospace; font-size: 12px; color: var(--muted); }
+
+  table.killlog { width: 100%; border-collapse: collapse; margin: 8px 0 18px; font-size: 14px; }
+  table.killlog th, table.killlog td { text-align: left; padding: 10px 8px;
+    border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.killlog th { font-family: "Spline Sans Mono", monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-family: "Spline Sans Mono", monospace; font-size: 11px; color: var(--muted);
+    letter-spacing: 0.08em; }
+  @media (max-width: 560px) {
+    .card-top { grid-template-columns: auto 1fr; }
+    .score { grid-column: 2; font-size: 30px; }
+    .meta, .qa { grid-template-columns: 1fr; }
+    .axis { grid-template-columns: 96px 1fr 24px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <p class="eyebrow">Idea Forge report</p>
+      <h1>Tools for small online sellers in Indonesia</h1>
+      <p class="meta-line">mode standard  /  region ID  /  lang id  /  2026-06-02 14:37</p>
+      <p class="constraints">Constraints: solo founder, under $5k, ship in 60 days</p>
+      <div class="stats"><div class="stat"><span class="n">27</span><span class="l">generated</span></div><div class="stat"><span class="n">19</span><span class="l">evidenced</span></div><div class="stat"><span class="n">8</span><span class="l">speculative</span></div><div class="stat"><span class="n">3</span><span class="l">survivors</span></div></div>
+    </header>
+
+    <section class="shortlist">
+        <article class="card lead" style="animation-delay:0.00s">
+          <div class="card-top">
+            <span class="rank">1</span>
+            <div class="card-head">
+              <h3>Auto-reconciliation for marketplace payouts</h3>
+              <span class="badge ev">EVIDENCED</span>
+            </div>
+            <span class="score">8.4</span>
+          </div>
+          <p class="rationale">Sellers lose hours each week matching marketplace payouts to orders, and no cheap local tool does it for them.</p>
+          <div class="axes"><div class="axis"><span class="axis-name">demand</span><span class="bar"><span class="fill" style="width:90%"></span></span><span class="axis-val">9</span></div><div class="axis"><span class="axis-name">problem-realness</span><span class="bar"><span class="fill" style="width:90%"></span></span><span class="axis-val">9</span></div><div class="axis"><span class="axis-name">buildability</span><span class="bar"><span class="fill" style="width:70%"></span></span><span class="axis-val">7</span></div><div class="axis"><span class="axis-name">survivability</span><span class="bar"><span class="fill" style="width:80%"></span></span><span class="axis-val">8</span></div><div class="axis"><span class="axis-name">clarity</span><span class="bar"><span class="fill" style="width:80%"></span></span><span class="axis-val">8</span></div></div>
+          <div class="meta">
+            <div><span class="k">Biggest risk</span><span class="v">Marketplace payout APIs may be gated or change without notice.</span></div>
+            <div><span class="k">First step</span><span class="v">Build the cash-on-delivery payout parser for the single largest local marketplace.</span></div>
+          </div>
+        </article>
+        <article class="card " style="animation-delay:0.08s">
+          <div class="card-top">
+            <span class="rank">2</span>
+            <div class="card-head">
+              <h3>Returns-reason analytics for small sellers</h3>
+              <span class="badge ev">EVIDENCED</span>
+            </div>
+            <span class="score">7.1</span>
+          </div>
+          <p class="rationale">Returns are frequent but sellers cannot see why, so they cannot fix the cause. A light dashboard surfaces the pattern.</p>
+          <div class="axes"><div class="axis"><span class="axis-name">demand</span><span class="bar"><span class="fill" style="width:70%"></span></span><span class="axis-val">7</span></div><div class="axis"><span class="axis-name">problem-realness</span><span class="bar"><span class="fill" style="width:80%"></span></span><span class="axis-val">8</span></div><div class="axis"><span class="axis-name">buildability</span><span class="bar"><span class="fill" style="width:80%"></span></span><span class="axis-val">8</span></div><div class="axis"><span class="axis-name">survivability</span><span class="bar"><span class="fill" style="width:60%"></span></span><span class="axis-val">6</span></div><div class="axis"><span class="axis-name">clarity</span><span class="bar"><span class="fill" style="width:70%"></span></span><span class="axis-val">7</span></div></div>
+          <div class="meta">
+            <div><span class="k">Biggest risk</span><span class="v">Sellers may not log enough structured returns data to cluster.</span></div>
+            <div><span class="k">First step</span><span class="v">Ingest one seller&#x27;s last 90 days of returns and cluster the reasons.</span></div>
+          </div>
+        </article>
+        <article class="card " style="animation-delay:0.16s">
+          <div class="card-top">
+            <span class="rank">3</span>
+            <div class="card-head">
+              <h3>Localized chat-macro library for seller support</h3>
+              <span class="badge spec">SPECULATIVE</span>
+            </div>
+            <span class="score">6.2</span>
+          </div>
+          <p class="rationale">Plausible demand but weaker direct evidence. Validate with interviews before any build.</p>
+          <div class="axes"><div class="axis"><span class="axis-name">demand</span><span class="bar"><span class="fill" style="width:60%"></span></span><span class="axis-val">6</span></div><div class="axis"><span class="axis-name">problem-realness</span><span class="bar"><span class="fill" style="width:60%"></span></span><span class="axis-val">6</span></div><div class="axis"><span class="axis-name">buildability</span><span class="bar"><span class="fill" style="width:90%"></span></span><span class="axis-val">9</span></div><div class="axis"><span class="axis-name">survivability</span><span class="bar"><span class="fill" style="width:50%"></span></span><span class="axis-val">5</span></div><div class="axis"><span class="axis-name">clarity</span><span class="bar"><span class="fill" style="width:70%"></span></span><span class="axis-val">7</span></div></div>
+          <div class="meta">
+            <div><span class="k">Biggest risk</span><span class="v">Demand is inferred, not observed. Could be a vitamin, not a painkiller.</span></div>
+            <div><span class="k">First step</span><span class="v">Interview five sellers about their support reply workflow before writing code.</span></div>
+          </div>
+        </article></section>
+    
+    <details class="section">
+      <summary><h2>The Swarm</h2><span class="hint">all generated ideas, click to expand</span></summary>
+      <div class="swarm-grid"><div class="persona-group"><h4>The Pain Hunter</h4><ul class="idea-list"><li><span class="badge ev">EVIDENCED</span> <strong>Auto-reconciliation for marketplace payouts</strong><br><span class="muted">Sellers post weekly about payout amounts not matching order totals.</span> <a href="https://www.reddit.com/r/jualan/" target="_blank" rel="noopener">source</a></li><li><span class="badge ev">EVIDENCED</span> <strong>Stock sync across two marketplaces</strong><br><span class="muted">Overselling when the same stock sits on two platforms.</span> <a href="https://www.reddit.com/r/UMKM/" target="_blank" rel="noopener">source</a></li></ul></div><div class="persona-group"><h4>The Constraints-First Realist</h4><ul class="idea-list"><li><span class="badge ev">EVIDENCED</span> <strong>Returns-reason analytics for small sellers</strong><br><span class="muted">Returns eat margin but the cause is invisible to the seller.</span> <a href="https://www.trustpilot.com/" target="_blank" rel="noopener">source</a></li></ul></div><div class="persona-group"><h4>The Trend Rider</h4><ul class="idea-list"><li><span class="badge spec">SPECULATIVE</span> <strong>Localized chat-macro library for seller support</strong><br><span class="muted">Support replies are repetitive but no local-language macro tool exists.</span></li></ul></div></div>
+    </details>
+    
+    <details class="section" open>
+      <summary><h2>The Council</h2><span class="hint">critiques, peer review, verdict</span></summary>
+      <div class="critiques"><div class="critique"><h4>Response A <span class="muted">(The Contrarian)</span></h4><p>The payout tool dies if the marketplace closes its API. Build the parser to tolerate scraping fallback or it is one policy change from zero.</p></div><div class="critique"><h4>Response B <span class="muted">(The Market Realist)</span></h4><p>Reconciliation has clear willingness to pay. Sellers already lose billable hours. Returns analytics is softer; sellers say they want it but rarely pay for visibility alone.</p></div><div class="critique"><h4>Response C <span class="muted">(The Executor)</span></h4><p>Reconciliation MVP is a weekend of parsing plus a table view. Returns clustering needs data volume most small sellers do not have on day one.</p></div></div>
+      <div class="verdict"><h4>Peer-review consensus</h4><p>Reviewers converged on the payout reconciliation idea as the strongest on demand and buildability. The returns idea ranked second but carried a data-availability risk. The support-macro idea was judged the weakest on evidence.</p></div><div class="verdict chair"><h4>Chairman verdict</h4><p>Lead with payout reconciliation. It has the clearest observed pain, the shortest path to a usable version, and direct willingness to pay. Treat the marketplace API as a dependency risk and design a scraping fallback from day one. Returns analytics is a credible second once a seller relationship exists. The support-macro idea should not be built before five validation interviews.</p></div>
+    </details>
+    
+    
+    <details class="section">
+      <summary><h2>Kill Log</h2><span class="hint">rejected ideas and why</span></summary>
+      <table class="killlog"><thead><tr><th>Idea</th><th>Reason killed</th></tr></thead>
+      <tbody><tr><td>Generic all-in-one seller dashboard</td><td class="muted">Too broad for the constraints, no wedge, crowded category.</td></tr><tr><td>AI product-photo enhancer</td><td class="muted">Strong incumbents already bundle this for free.</td></tr></tbody></table>
+    </details>
+
+    <footer>Generated by Idea Forge. Ranked by composite score across demand, problem-realness, buildability, survivability, and clarity. 2026</footer>
+  </div>
+</body>
+</html>
