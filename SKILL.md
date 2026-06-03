@@ -32,6 +32,7 @@ The user may pass flags inline, for example `forge ideas --deep --region=ID --la
 - `--refine` run the Phase 4 office-hours pass on the top idea  [off]
 - `--dry-run` print the run plan (mode, agents, estimated search count, phase sequence) and exit without executing  [off]
 - `--top` integer, how many survivors to include in the shortlist  [3]
+- `--resume` timestamp string (YYYYMMDD-HHMMSS), resume a previous run from its checkpoint  [off]
 
 ## Grounding policy
 
@@ -48,7 +49,7 @@ This skill is region and language neutral.
 
 ## PHASE 0, Framing
 
-1. Read the topic and parse any config flags. Scan the workspace for context (CLAUDE.md, notes). Record the run timestamp now in ISO 8601 compact format (YYYYMMDD-HHMMSS, e.g. 20260602-143709); use it for all output filenames and the anonymization seed. If `--dry-run` is set, print the run plan (mode, personas, estimated agent and search count, phase sequence) and stop without executing.
+1. Read the topic and parse any config flags. Scan the workspace for context (CLAUDE.md, notes). If `--resume <timestamp>` is set, load `idea-forge-checkpoint-<timestamp>.json`, restore all completed phase outputs from it into context, and skip directly to the first phase not listed in `completed_phases` — do not re-run any phase that is already recorded. Otherwise, record the run timestamp now in ISO 8601 compact format (YYYYMMDD-HHMMSS, e.g. 20260602-143709); use it for all output filenames, the checkpoint file, and the anonymization seed. If `--dry-run` is set, print the run plan (mode, personas, estimated agent and search count, phase sequence) and stop without executing.
 2. Load `idea-forge-killlog.md` if it exists. Extract the rejected idea titles and their one-line reasons into a KILL LOG block. This block is injected into every ideator prompt so the swarm does not re-propose known dead ends. If the file does not exist, the block is empty. If the log exceeds 50 entries, keep only the 50 most recent by appended order and move the remainder to `idea-forge-killlog-archive.md` before continuing.
 3. Detect language and region. State them plus the assumed constraints in a neutral framing block so the swarm has a target. If the topic is one or two words and gives the swarm nothing to anchor on, state the assumptions explicitly rather than asking, and proceed.
 4. Do not generate ideas yourself. The swarm does that.
@@ -157,6 +158,26 @@ Agent(
 )
 ```
 
+### Checkpoint after Phase 1
+
+Write `idea-forge-checkpoint-<timestamp>.json`:
+
+```json
+{
+  "timestamp": "<run timestamp>",
+  "topic": "<topic>",
+  "mode": "<mode>",
+  "flags": { "region": "...", "lang": "...", "constraints": "...", "max_searches": 3, "top": 3, "refine": false },
+  "completed_phases": ["0", "1"],
+  "phase_outputs": {
+    "0": { "framing": "<framing block text>", "region": "<region>", "lang": "<lang>", "kill_log_entry_count": 0 },
+    "1": { "ideation_ideas": [ "... all ideas in schema, one object per idea ..." ] }
+  }
+}
+```
+
+If the file already exists (this is a resumed run adding Phase 1), merge rather than overwrite: update `completed_phases` and `phase_outputs` in place.
+
 ---
 
 ## PHASE 1.5, Source Verification (controller)
@@ -170,6 +191,10 @@ Before validation:
 - Cluster near-duplicate ideas. Keep the best-articulated version of each cluster, note merged duplicates.
 - Carry 10 to 15 distinct ideas into validation, favoring high-REALISM and verified-evidence ideas.
 - In lite mode, verify only the ideas that reach the shortlist stage to save calls.
+
+### Checkpoint after Phase 1.5
+
+Update the checkpoint: add `"1.5"` to `completed_phases` and write the verified idea pool (all ideas with their final EVIDENCED/SPECULATIVE tag and verification note) to `phase_outputs["1.5"]`.
 
 ---
 
@@ -247,6 +272,10 @@ One chairman reads critiques plus peer reviews and produces:
   - SPECULATIVE penalty: subtract 1.5 from the final 0 to 10 composite.
 - Kill log: rejected ideas plus a one-line reason each. Append to `idea-forge-killlog.md` so future runs skip dead ends.
 
+### Checkpoint after Phase 2
+
+Update the checkpoint: add `"2"` to `completed_phases` and write to `phase_outputs["2"]`: the five critic outputs (with revealed persona), the peer-review consensus, the chairman shortlist with composite scores, and the kill log additions from this run.
+
 ---
 
 ## PHASE 2.5, Deep Mode Second Round (only when --mode=deep)
@@ -258,6 +287,10 @@ Standard mode stops after the chairman. Deep mode runs one more ideation round, 
 3. **Verify** the new ideas through Phase 1.5 (exhaustive in deep mode: fetch every URL, no sampling).
 4. **Merge and re-rank.** Add the verified new ideas to the round-one survivors and run them through the chairman once more for a single combined ranking. Do not re-run the full critic council on round one survivors that already passed; only the new entrants need critic scores, then the chairman ranks the merged set.
 5. The transcript records both rounds and the GAPS block.
+
+### Checkpoint after Phase 2.5
+
+Update the checkpoint: add `"2.5"` to `completed_phases` and write to `phase_outputs["2.5"]`: the GAPS block, the second-round ideation outputs, the verified new ideas, and the final combined shortlist.
 
 ---
 

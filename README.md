@@ -57,6 +57,7 @@ generate ideas for a solo-buildable SaaS in the legal space
 | `--refine` | (no value) | off | Run the office-hours pass on the top idea. |
 | `--dry-run` | (no value) | off | Print the run plan and cost estimate without executing. |
 | `--top` | integer | 3 | How many survivors to include in the shortlist. |
+| `--resume` | timestamp | off | Resume a failed run from its checkpoint (e.g. `--resume=20260602-143709`). |
 
 Example:
 
@@ -70,7 +71,7 @@ This skill spawns many sub-agents and runs many web searches, so it is heavier t
 
 - **lite**: 3 ideators, no synthesizer, no peer review, capped searches. Approximately 3 agents and 6 searches. Fastest and cheapest. Good for a quick scan.
 - **standard**: full swarm, synthesizer, source verification, council, peer review. Approximately 17 agents and 15 searches. The default.
-- **deep**: standard plus one extra ideation round aimed at the council's gaps, then a combined re-rank, with every source verified. Approximately 28 agents and 30 searches. Most thorough and most expensive. Use it when the decision matters.
+- **deep**: standard plus one extra ideation round aimed at the council's gaps, then a combined re-rank, with every source verified. Approximately 28 agents and 30 searches. Most thorough and most expensive. Use it when the decision matters. A checkpoint file is written after each phase so a failed run can be resumed with `--resume`.
 
 If your environment restricts sub-agent tools, the skill falls back to having the orchestrator run the searches and inject results into the persona agents, so it still produces grounded ideas.
 

@@ -4,6 +4,8 @@
 /idea-forge-report-*.html
 /idea-forge-design-*.md
 /idea-forge-killlog.md
+/idea-forge-killlog-archive.md
+/idea-forge-checkpoint-*.json
 
 # OS / editor noise
 .DS_Store
