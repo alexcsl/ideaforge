@@ -58,6 +58,7 @@ generate ideas for a solo-buildable SaaS in the legal space
 | `--dry-run` | (no value) | off | Print the run plan and cost estimate without executing. |
 | `--top` | integer | 3 | How many survivors to include in the shortlist. |
 | `--resume` | timestamp | off | Resume a failed run from its checkpoint (e.g. `--resume=20260602-143709`). |
+| `--save` | (no value) | off | Write all outputs to disk. By default everything stays in-memory and you are asked at the end. |
 
 Example:
 
@@ -103,6 +104,21 @@ idea-forge/
 - **Change the scoring weights**: edit the chairman weights in `SKILL.md`. Defaults: demand 0.30, problem-realness 0.25, buildability 0.20, survivability 0.15, clarity 0.10. SPECULATIVE penalty: -1.5 from the composite.
 - **Restyle the report**: edit the CSS in `examples/sample-report.html`. Every run reuses that style, so changing it once changes all future reports.
 - **Add or swap personas**: edit the persona lists in `SKILL.md`.
+
+## Dynamic Workflow version
+
+`SKILL-dynamic.md` is a separate, faster variant of the same pipeline. Triggers: `forge ideas smart:`, `dynamic ideate on`, `smart brainstorm`. Key differences from the standard version:
+
+- Verification runs per-ideator as outputs arrive instead of waiting for all 5.
+- Quality gates: auto-spawn 2 extra agents if the evidenced idea count is too low; skip the deep second round if the top idea is already very strong.
+- Synthesizer is skipped when the pool is already strong.
+- 3 of the 5 critics are selected dynamically based on what the idea pool most needs.
+- Peer review starts after the first 3 critics return instead of waiting for all 5.
+- A preliminary shortlist is shown mid-run while the remaining critics finish.
+- Ideas are summarized before reaching the council, reducing token cost.
+- Same output format, same security rules, same `--save` behavior as the standard version.
+
+Use the standard version when you want the full unmodified pipeline. Use the dynamic version when wall-clock time or cost matters.
 
 ## Credit
 
