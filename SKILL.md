@@ -315,7 +315,7 @@ The pass does four things in order:
 3. **Forcing questions.** Ask the six startup-mode questions: demand reality, status quo, desperate specificity, narrowest wedge, observation and surprise, future-fit. These are uncomfortable on purpose. If the user cannot name a specific person who needs this, that is the most important thing to surface before writing code.
 4. **Implementation alternatives.** Offer 2 to 3 build approaches with honest effort estimates, then recommend the narrowest wedge that produces real usage signal.
 
-Output a design doc `idea-forge-design-<timestamp>.md` capturing the reframe, accepted premises, the answers, the chosen approach, and the first step. This doc is the handoff to whatever planning or build process the user uses next.
+Present the reframe, accepted premises, answers, chosen approach, and first step in chat. Hold the design doc in-memory. If `--save` is set, write `idea-forge-design-<timestamp>.md`; otherwise ask the user if they want it saved before the session ends.
 
 If `--refine` is set but the environment is non-interactive (no live back-and-forth with the user during the run), pose the six forcing questions and leave them blank in the design doc with a note "awaiting user answers." Do not invent answers or proceed as if the questions were answered.
 
